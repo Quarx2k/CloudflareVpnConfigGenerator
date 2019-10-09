@@ -1,5 +1,7 @@
 package com.quarx2k.cloudflare
 
+import com.quarx2k.cloudflare.Urls.CLOUDFLARE_ACCOUNT_REG
+import com.quarx2k.cloudflare.model.CloudFlarePurchaseTokenRequest
 import com.quarx2k.cloudflare.model.CloudFlareRegRequest
 import com.quarx2k.cloudflare.model.CloudFlareRegResponse
 import com.quarx2k.cloudflare.model.CloudFlareRegTokenRequest
@@ -23,7 +25,7 @@ object CloudFlareUtils {
     private fun createRestTemplate() : RestTemplate {
         val clientHttpRequestFactory = HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().build())
         val restTemplate = RestTemplate(BufferingClientHttpRequestFactory(clientHttpRequestFactory))
-       // restTemplate.interceptors = listOf(RequestResponseLoggingInterceptor())
+        //restTemplate.interceptors = listOf(RequestResponseLoggingInterceptor())
         restTemplate.messageConverters.add(MappingJackson2HttpMessageConverter())
         return restTemplate
     }
@@ -47,6 +49,30 @@ object CloudFlareUtils {
         val cfReg = CloudFlareRegTokenRequest(publicKey)
         val request = HttpEntity(cfReg, headers);
         val response = restTemplate.exchange(Urls.CLOUDFLARE_REG + "/" + cfResponse.id, HttpMethod.PUT, request, CloudFlareRegResponse::class.java)
+        response.body?.account?.let {
+            println(String.format("Account type: " + it.account_type))
+            println(String.format("Warp Plus: " + it.warp_plus))
+        }
+        return response.body
+    }
+
+    fun setPurchaseToken(purchaseToken: String, cfResponse: CloudFlareRegResponse) {
+        val restTemplate = createRestTemplate()
+        val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
+        headers.add("Content-Type", "application/json")
+        headers.add("Authorization", "Bearer " + cfResponse.token)
+        val cfReg = CloudFlarePurchaseTokenRequest(purchaseToken)
+        val request = HttpEntity(cfReg, headers);
+        restTemplate.postForLocation(String.format(CLOUDFLARE_ACCOUNT_REG, cfResponse.id), request)
+    }
+
+    fun getRegisterData(cfResponse: CloudFlareRegResponse) : CloudFlareRegResponse? {
+        val restTemplate = createRestTemplate()
+        val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
+        headers.add("Content-Type", "application/json")
+        headers.add("Authorization", "Bearer " + cfResponse.token)
+        val request = HttpEntity(null, headers)
+        val response = restTemplate.exchange(Urls.CLOUDFLARE_REG + "/" + cfResponse.id, HttpMethod.GET, request, CloudFlareRegResponse::class.java)
         response.body?.account?.let {
             println(String.format("Account type: " + it.account_type))
             println(String.format("Warp Plus: " + it.warp_plus))

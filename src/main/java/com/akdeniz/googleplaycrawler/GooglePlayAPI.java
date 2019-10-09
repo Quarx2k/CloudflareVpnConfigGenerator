@@ -172,11 +172,9 @@ public class GooglePlayAPI {
 		AndroidCheckinResponse checkinResponse = postCheckin(Utils.generateAndroidCheckinRequest().toByteArray());
 		this.setAndroidID(BigInteger.valueOf(checkinResponse.getGsfId()).toString(16));
 		setSecurityToken((BigInteger.valueOf(checkinResponse.getSecurityToken()).toString(16)));
-
 		String c2dmAuth = loginAC2DM ? loginAC2DM() : null;
 		// login();
 		// String c2dmAuth= getToken();
-
 		AndroidCheckinRequest.Builder checkInbuilder = AndroidCheckinRequest
 				.newBuilder(Utils.generateAndroidCheckinRequest());
 

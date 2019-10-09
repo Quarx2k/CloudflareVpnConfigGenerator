@@ -11,21 +11,23 @@ class Application {
         @JvmStatic
         fun main(args: Array<String>) {
 
-            if (args.size == 1 || args.size > 2) {
+            if (args.size == 1 || args.size > 3) {
                 println()
                 println("Usage:")
                 println()
-                println("For Existing Warp Account: java -jar cloudflare-1.0-all.jar GoogleLogin GooglePassword\n")
+                println("For Existing Warp Account: java -jar cloudflare-1.0-all.jar GoogleLogin GooglePassword PurchaseToken\n")
                 println("For Free Warp Account: java -jar cloudflare-1.0-all.jar\n")
                 return
             }
 
             var login = ""
             var password = "";
+            var purchaseToken = "";
 
-            if (args.size == 2) {
+            if (args.size == 3) {
                 login = args[0]
                 password = args[1]
+                purchaseToken = args[2]
             }
 
             val c2dmEnabled = login.isNotEmpty() && password.isNotEmpty()
@@ -35,15 +37,19 @@ class Application {
             val checkinResponse = api.checkin(c2dmEnabled)
 
             if (c2dmEnabled) {
-                api.login()
-                api.uploadDeviceConfig()
+                //api.login()
+                //api.uploadDeviceConfig()
+                //println(api.purchaseAndDeliver("subs:com.cloudflare.onedotonedotonedotone:plus.warp.1m", 754, 1))
+                //return
             }
 
             val googleToken = GoogleUtils.getFcmToken(checkinResponse) ?: throw Exception("Google Token is null!!")
             var cfResponse = CloudFlareUtils.register(keyPair.publicKey.toBase64(), googleToken) ?: throw Exception("Cf response is null!!")
             if (c2dmEnabled) {
                 keyPair = KeyPair()
-                cfResponse = CloudFlareUtils.registerWithToken(keyPair.publicKey.toBase64(), cfResponse) ?: throw Exception("Cf Auth response is null!!")
+                CloudFlareUtils.setPurchaseToken(purchaseToken, cfResponse)
+                //CloudFlareUtils.getRegisterData(cfResponse) ?: throw Exception("Cf Reg data response is null!!")
+                cfResponse = CloudFlareUtils.registerWithToken(keyPair.publicKey.toBase64(), cfResponse) ?: throw Exception("Cf Reg Token response is null!!")
             }
 
             val configGenerator = ConfigGenerator(keyPair.privateKey.toBase64(), cfResponse)
