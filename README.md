@@ -6,9 +6,9 @@
 
 ## Usage
 
-*For Existing Warp Account:* **java -jar cloudflare-1.0-all.jar GoogleLogin GooglePassword**
+*For Existing Warp Account:* **java -jar cloudflare-x.x-all.jar GoogleLogin GooglePassword PurchaseToken**
 
-*For Free Warp Account:* **java -jar cloudflare-1.0-all.jar**
+*For Free Warp Account:* **java -jar cloudflare-x.x-all.jar**
 
 *Google Accounts with 2FA:* https://support.google.com/accounts/answer/185833
 
